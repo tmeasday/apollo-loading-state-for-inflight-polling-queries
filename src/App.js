@@ -1,48 +1,42 @@
-import React, { Component } from "react";
-import { graphql } from "react-apollo";
-import gql from "graphql-tag";
+import React, { Component } from 'react';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 
 class App extends Component {
   render() {
-    const { data: { loading, people } } = this.props;
-    return (
-      <main>
-        <header>
-          <h1>Apollo Client Error Template</h1>
-          <p>
-            This is a template that you can use to demonstrate an error in
-            Apollo Client. Edit the source code and watch your browser window
-            reload with the changes.
-          </p>
-          <p>
-            The code which renders this component lives in{" "}
-            <code>./src/App.js</code>.
-          </p>
-          <p>
-            The GraphQL schema is in <code>./src/graphql/schema</code>.
-            Currently the schema just serves a list of people with names and
-            ids.
-          </p>
-        </header>
-        {loading ? (
-          <p>Loading…</p>
-        ) : (
-          <ul>
-            {people.map(person => <li key={person.id}>{person.name}</li>)}
-          </ul>
-        )}
-      </main>
-    );
+    const { data: { loading } } = this.props;
+    console.log({ loading });
+    return <main>See console</main>;
   }
 }
 
-export default graphql(
+const AppWithData = graphql(
   gql`
-    query ErrorTemplate {
-      people {
-        id
-        name
-      }
+    query Query {
+      echo(delay: 2000)
     }
-  `
+  `,
+  {
+    options: {
+      pollInterval: 5000,
+    },
+  }
 )(App);
+
+export default class AppWithDataAndChangingProps extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { prop: 'first-value' };
+  }
+
+  componentDidMount() {
+    // wait until the polled version of the query is waiting
+    setTimeout(() => {
+      this.setState({ prop: 'second-value' });
+    }, 6000);
+  }
+
+  render() {
+    return <AppWithData prop={this.state.prop} />;
+  }
+}
